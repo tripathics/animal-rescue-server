@@ -9,4 +9,4 @@ export const updateAvatarFile = multer({
 export const uploadPostPictures = multer({
   storage,
   limits: { fileSize: MAX_POST_SIZE }, // 2MB
-}).single('pictures'); // Allow up to 10 files
+}).array('pictures', 5); // Allow up to 5 files

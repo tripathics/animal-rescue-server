@@ -15,7 +15,10 @@ CREATE TABLE IF NOT EXISTS profiles (
     city varchar(64) NOT NULL,
     country  varchar(64) NOT NULL,
 
-    phone varchar(15), 
+    location_lat numeric DEFAULT NULL,
+    location_lng numeric DEFAULT NULL,
+
+    phone varchar(15),
     avatar varchar(255) DEFAULT NULL
 );
 
@@ -25,6 +28,18 @@ CREATE TABLE IF NOT EXISTS posts (
     description text NOT NULL,
     pictures text[] DEFAULT NULL,
     post_type text NOT NULL CHECK(post_type IN ('post', 'donation')),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS rescues (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+    org_id uuid REFERENCES users(id) ON DELETE CASCADE,
+    animal_name text NOT NULL,
+    description text NOT NULL,
+    location_lat numeric NOT NULL,
+    location_lng numeric NOT NULL,
+    pictures text[] NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 

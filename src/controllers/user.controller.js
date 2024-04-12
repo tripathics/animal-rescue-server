@@ -4,6 +4,7 @@ import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
 import Profile from '../models/profile.model.js';
+import { deleteFile } from '../utils/media.util.js';
 
 export const checkEmailNotExists = async (req, res, next) => {
   try {
@@ -128,12 +129,12 @@ export const logout = async (req, res) => {
 };
 
 export const updateProfile = async (req, res, next) => {
-  if (req.user.profile_locked) {
-    return res.status(400).json({ message: 'Profile is locked' });
-  }
   try {
-    const { id: userId } = req.user;
+    const { id: userId, first_name, role } = req.user;
     const profileData = req.body;
+    if (role.includes('org') && !first_name && (!profileData.location_lat || !profileData.location_lng)) {
+      throw new ApiError(400, 'Profile', 'Location is required for organization profile creation');
+    }
 
     const updatedProfile = await Profile.createOrUpdate(userId, profileData);
     res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });

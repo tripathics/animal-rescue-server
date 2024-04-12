@@ -13,6 +13,9 @@ export const errorHandler = (err, req, res, next) => {
 
   logger.error(err.message);
 
+  if (process.env.NODE_ENV === 'development')
+    logger.error(err.stack);
+
   res.status(statusCode).json({
     message,
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,

@@ -11,6 +11,8 @@ const profileColumns = [
   'country',
   'phone',
   'avatar',
+  'location_lat',
+  'location_lng',
 ];
 
 class Profile {

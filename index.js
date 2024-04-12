@@ -4,7 +4,6 @@ import { verifyDbConnection } from './src/config/db.config.js';
 import { verifyTransporterConnection } from './src/config/nodemailer.config.js';
 import http from 'http';
 import { Server as SocketIo } from 'socket.io';
-import path from 'path';
 
 const PORT = 5000 || process.env.PORT;
 
@@ -22,9 +21,9 @@ app.listen(PORT, async () => {
   }
 })
 
-const PORT1 = process.env.PORT || 3000;
+const SOCKET_PORT = process.env.SOCKET_PORT || 3000;
 const server = http.createServer(app);
-const io = new socketIo(server);
+const io = new SocketIo(server);
 
 // Serve static files from the 'public' directory
 
@@ -45,6 +44,6 @@ io.on('connection', socket => {
 });
 
 // Start the server
-server.listen(PORT1, () => {
-  console.log(`Server is running on port ${PORT1}`);
+server.listen(SOCKET_PORT, () => {
+  console.log(`Server is running on port ${SOCKET_PORT}`);
 });

@@ -25,22 +25,17 @@ const storage = multer.diskStorage({
       cb(null, AVATAR_DIR);
     } else if (file.fieldname === 'pictures') {
       cb(null, POSTS_DIR);
+    } else if (file.fieldname === "rescue_pictures") {
+      cb(null, POSTS_DIR);
     } else {
       cb('Error: Invalid fieldname!');
     }
   },
   filename(req, file, cb) {
-    if (file.fieldname === 'avatar') {
-      const now = new Date();
-      const userId = req.user.id; // Assuming you have the user ID available in the request object
-      const extname = path.extname(file.originalname).toLowerCase();
-      cb(null, userId + now.getTime() + extname);
-    } else {
-      // posts may have multiple files, so we need to handle this case
-      const now = new Date();
-      const extname = path.extname(file.originalname).toLowerCase();
-      cb(null, file.originalname + now.getTime() + extname);
-    }
+    const now = new Date();
+    const userId = req.user.id; // Assuming you have the user ID available in the request object
+    const extname = path.extname(file.originalname).toLowerCase();
+    cb(null, userId + now.getTime() + extname);
   },
   fileFilter(req, file, cb) {
     const filetypes = /png|jpg|jpeg|webp/;

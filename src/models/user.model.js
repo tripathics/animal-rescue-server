@@ -6,9 +6,20 @@ class User {
     return rows;
   }
 
+  static async findOrganizations() {
+    const { rows } = await db.query(`
+    SELECT users.*, profiles.*
+    FROM users RIGHT JOIN profiles ON users.id = profiles.user_id
+    WHERE 'org' = ANY(users.role)
+    `);
+    return rows;
+  }
+
   static async findById(id) {
     const result = await db.query(`
-    SELECT * FROM users WHERE id = $1
+    SELECT users.*, profiles.first_name FROM users 
+    LEFT JOIN profiles ON users.id = profiles.user_id
+    WHERE id = $1
     `, [id]);
     return result.rows[0];
   }
