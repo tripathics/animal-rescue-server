@@ -26,20 +26,29 @@ export const getNearbyOrgs = async (req, res, next) => {
       return degrees * (Math.PI / 180);
     };
 
-    const nearbyOrgsRecord = orgsRecord.filter(org => {
+    const getDistance = (lat1, lng1, lat2, lng2) => {
+      const radians = (degrees) => {
+        degrees = parseFloat(degrees);
+        return degrees * (Math.PI / 180);
+      };
+
       const distance = 6371 * Math.acos(
         Math.min(1,
-          Math.cos(radians(location.lat)) *
-          Math.cos(radians(org.location_lat)) *
-          Math.cos(radians(org.location_lng) - radians(location.lng)) +
-          Math.sin(radians(location.lat)) *
-          Math.sin(radians(org.location_lat))
+          Math.cos(radians(lat1)) *
+          Math.cos(radians(lat2)) *
+          Math.cos(radians(lng2) - radians(lng1)) +
+          Math.sin(radians(lat1)) *
+          Math.sin(radians(lat2))
         )
       );
-      console.log(distance);
+      return distance;
+    }
 
-      return distance < 5;
-    }).slice(0, 10);
+    const nearbyOrgsRecord = orgsRecord.map(org => ({
+      ...org,
+      distance: getDistance(location.lat, location.lng, org.location_lat, org.location_lng)
+    })).sort((a, b) => (a.distance - b.distance
+    )).slice(0, 10);
 
     res.status(200).json({ organizations: nearbyOrgsRecord });
   } catch (error) {
