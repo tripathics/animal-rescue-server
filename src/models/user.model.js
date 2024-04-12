@@ -18,11 +18,13 @@ class User {
     return result.rows[0];
   }
 
-  static async findWithBasicProfile() {
+  static async findByEmailWithProfile(email) {
     const { rows } = await db.query(`
-    SELECT users.id, users.email, users.role, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar
-    FROM users LEFT JOIN profiles ON users.id = profiles.user_id`);
-    return rows;
+    SELECT users.*, profiles.*
+    FROM users LEFT JOIN profiles ON users.id = profiles.user_id
+    WHERE users.email = $1
+    `, [email]);
+    return rows[0];
   }
 
   static async create({ email, password, role = 'user' }) {

@@ -40,7 +40,7 @@ const migrate = async () => {
     console.log('Migration complete');
 
     // seed admin
-    await seedAdmin(client);
+    // await seedAdmin(client);
   } catch (error) {
     console.error('Migration failed', error.message);
   } finally {

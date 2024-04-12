@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
+import Profile from '../models/profile.model.js';
 
 export const checkEmailNotExists = async (req, res, next) => {
   try {
@@ -32,7 +33,7 @@ export const checkEmailExists = async (req, res, next) => {
 
 export const register = async (req, res, next) => {
   try {
-    const { email, password, confirmPassword } = req.body;
+    const { email, password, confirmPassword, role } = req.body;
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
     }
@@ -55,7 +56,7 @@ export const register = async (req, res, next) => {
 
     // hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashedPassword });
+    const user = await User.create({ email, password: hashedPassword, role });
     delete user.password;
     res.status(201).json(user);
   } catch (error) {
@@ -87,7 +88,7 @@ export const updatePassword = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const userProfileRecord = await User.findByEmail(email);
+    const userProfileRecord = await User.findByEmailWithProfile(email);
     if (!userProfileRecord) {
       throw new ApiError(401, 'User', 'User does not exist with this email. Please register first.');
     }
@@ -110,7 +111,7 @@ export const login = async (req, res, next) => {
 export const readUser = async (req, res, next) => {
   try {
     const { email } = req.user;
-    const userProfileRecord = await User.findByEmail(email);
+    const userProfileRecord = await User.findByEmailWithProfile(email);
     if (!userProfileRecord) {
       throw new ApiError(404, 'User', 'User not found');
     }
@@ -124,4 +125,37 @@ export const readUser = async (req, res, next) => {
 
 export const logout = async (req, res) => {
   res.clearCookie('auth').json({ message: 'User logged out', success: true });
+};
+
+export const updateProfile = async (req, res, next) => {
+  if (req.user.profile_locked) {
+    return res.status(400).json({ message: 'Profile is locked' });
+  }
+  try {
+    const { id: userId } = req.user;
+    const profileData = req.body;
+
+    const updatedProfile = await Profile.createOrUpdate(userId, profileData);
+    res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAvatar = async (req, res, next) => {
+  try {
+    const { id: userId, email } = req.user;
+    const avatar = req.file?.filename;
+
+    // delete old avatar
+    const userProfile = await User.findByEmailWithProfile(email);
+    if (userProfile.avatar) {
+      deleteFile(userProfile.avatar, 'avatar');
+    }
+
+    const result = await Profile.updateAvatar(userId, avatar);
+    res.status(200).json({ success: true, result, message: 'Avatar updated' });
+  } catch (error) {
+    next(error);
+  }
 };

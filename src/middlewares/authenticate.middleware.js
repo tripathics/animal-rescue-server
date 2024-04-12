@@ -25,9 +25,9 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-export const authenticateAdmin = async (req, res, next) => {
+export const authenticateOrg = async (req, res, next) => {
   authenticate(req, res, () => {
-    if (!req.user.role.includes('admin')) {
+    if (!req.user.role.includes('org')) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     next();
